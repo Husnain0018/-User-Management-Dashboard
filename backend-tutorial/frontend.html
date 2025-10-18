@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>👨‍💻 User Management Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6">
+
+  <!-- Header -->
+  <h1 class="text-3xl font-bold text-blue-700 mb-6">👋 User Management Dashboard</h1>
+
+  <!-- Action Buttons -->
+  <div class="bg-white shadow-md rounded-lg p-6 w-full max-w-xl space-y-6">
+
+    <!-- Get Users -->
+    <div class="flex flex-col space-y-2">
+      <button id="getUsers" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+        📜 Get All Users
+      </button>
+    </div>
+
+    <hr class="my-2 border-gray-300">
+
+    <!-- Add User -->
+    <div>
+      <h2 class="text-lg font-semibold mb-2 text-gray-700">➕ Add New User</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+        <input id="userId" type="number" placeholder="User ID" class="border rounded px-2 py-1" />
+        <input id="userName" type="text" placeholder="User Name" class="border rounded px-2 py-1" />
+        <input id="userRole" type="text" placeholder="User Role" class="border rounded px-2 py-1" />
+      </div>
+      <button id="addUser" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+        Add User
+      </button>
+    </div>
+
+    <hr class="my-2 border-gray-300">
+
+    <!-- Delete User -->
+    <div>
+      <h2 class="text-lg font-semibold mb-2 text-gray-700">🗑️ Delete User</h2>
+      <div class="flex space-x-2">
+        <input id="deleteId" type="number" placeholder="Enter User ID" class="border rounded px-2 py-1 flex-grow" />
+        <button id="deleteUser" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <hr class="my-2 border-gray-300">
+
+    <!-- Delete All -->
+    <div>
+      <h2 class="text-lg font-semibold mb-2 text-gray-700">💣 Delete All Users</h2>
+      <button id="deleteAll" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+        Delete All
+      </button>
+    </div>
+  </div>
+
+  <!-- Output Section -->
+  <div class="bg-white shadow-md rounded-lg p-4 mt-6 w-full max-w-2xl">
+    <h2 class="text-lg font-semibold text-gray-700 mb-2">📦 Output</h2>
+    <pre id="output" class="bg-gray-900 text-green-400 p-3 rounded overflow-auto text-sm h-64"></pre>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const output = document.getElementById("output");
+
+    // ✅ GET USERS
+    document.getElementById("getUsers").onclick = async () => {
+      const res = await fetch("http://localhost:3000/users");
+      const data = await res.json();
+      output.textContent = JSON.stringify(data, null, 2);
+    };
+
+    // ✅ ADD USER
+    document.getElementById("addUser").onclick = async () => {
+      const id = document.getElementById("userId").value.trim();
+      const name = document.getElementById("userName").value.trim();
+      const role = document.getElementById("userRole").value.trim();
+
+      if (!id || !name || !role) {
+        alert("⚠️ Please fill all fields!");
+        return;
+      }
+
+      const res = await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: parseInt(id), name, role })
+      });
+
+      const data = await res.json();
+      output.textContent = JSON.stringify(data, null, 2);
+
+      // ✅ clear fields after adding user
+      document.getElementById("userId").value = "";
+      document.getElementById("userName").value = "";
+      document.getElementById("userRole").value = "";
+    };
+
+    // ✅ DELETE USER
+    document.getElementById("deleteUser").onclick = async () => {
+      const id = document.getElementById("deleteId").value.trim();
+      if (!id) {
+        alert("⚠️ Please enter a user ID!");
+        return;
+      }
+
+      const res = await fetch(`http://localhost:3000/users/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      output.textContent = JSON.stringify(data, null, 2);
+
+      // ✅ clear input after deleting
+      document.getElementById("deleteId").value = "";
+    };
+
+    // ✅ DELETE ALL USERS
+    document.getElementById("deleteAll").onclick = async () => {
+      const confirmDelete = confirm("⚠️ Are you sure you want to delete ALL users?");
+      if (!confirmDelete) return;
+
+      const res = await fetch("http://localhost:3000/users", { method: "DELETE" });
+      const data = await res.json();
+      output.textContent = JSON.stringify(data, null, 2);
+    };
+  </script>
+</body>
+</html>
